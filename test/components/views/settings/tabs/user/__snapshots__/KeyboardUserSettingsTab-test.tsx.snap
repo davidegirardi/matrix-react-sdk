@@ -616,12 +616,6 @@ exports[`KeyboardUserSettingsTab renders list of keyboard shortcuts 1`] = `
                   >
                     <kbd>
                        
-                      Alt
-                       
-                    </kbd>
-                    +
-                    <kbd>
-                       
                       Esc
                        
                     </kbd>

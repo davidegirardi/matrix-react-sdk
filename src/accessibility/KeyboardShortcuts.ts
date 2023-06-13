@@ -431,7 +431,6 @@ export const KEYBOARD_SHORTCUTS: IKeyboardShortcuts = {
     },
     [KeyBindingAction.MarkRoomAsRead]: {
         default: {
-            altKey: true,
             key: Key.ESCAPE,
         },
         displayName: _td("Mark as read"),
