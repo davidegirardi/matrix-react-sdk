@@ -26,7 +26,7 @@ export enum E2EStatus {
     Normal = "normal",
 }
 
-export async function shieldStatusForRoom(client: MatrixClient, room: Room): Promise<E2EStatus> {
+export async function shieldStatusForRoom(client: MatrixClient, room: Room, verbose=false): Promise<E2EStatus> {
     const crypto = client.getCrypto();
     if (!crypto) {
         return E2EStatus.Warning;
@@ -58,6 +58,9 @@ export async function shieldStatusForRoom(client: MatrixClient, room: Room): Pro
             members.length === 1; // Do alarm for self if we're alone in a room
         const targets = includeUser ? [...verified, client.getUserId()!] : verified;
         const devicesByUser = await crypto.getUserDeviceInfo(targets);
+        if (verbose) {
+            var usersWithUnverifiedDevices: string[] = [];
+        }
         for (const userId of targets) {
             const devices = devicesByUser.get(userId);
             if (!devices) {
@@ -67,6 +70,16 @@ export async function shieldStatusForRoom(client: MatrixClient, room: Room): Pro
                 return E2EStatus.Warning;
             }
 
+            if (verbose) {
+                for (const deviceId of devices.keys()) {
+                    const verificationStatus = await crypto.getDeviceVerificationStatus(userId, deviceId);
+                    if (!verificationStatus.isVerified()) {
+                        console.log("UNVERIFIED_DEV:", userId, "has unverified devices")
+                        usersWithUnverifiedDevices.push(userId);
+                    }
+                }
+            }
+
             const anyDeviceNotVerified = await asyncSome(devices.keys(), async (deviceId) => {
                 const verificationStatus = await crypto.getDeviceVerificationStatus(userId, deviceId);
                 return !verificationStatus?.isVerified();
@@ -74,6 +87,10 @@ export async function shieldStatusForRoom(client: MatrixClient, room: Room): Pro
             if (anyDeviceNotVerified) {
                 return E2EStatus.Warning;
             }
+
+        }
+        if (verbose && usersWithUnverifiedDevices.length > 0) {
+            return E2EStatus.Warning;
         }
 
         return unverified.length === 0 ? E2EStatus.Verified : E2EStatus.Normal;
