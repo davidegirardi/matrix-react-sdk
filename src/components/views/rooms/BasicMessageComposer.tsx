@@ -804,10 +804,21 @@ export default class BasicMessageEditor extends React.Component<IProps, IState> 
         const wrapperClasses = classNames("mx_BasicMessageComposer", {
             mx_BasicMessageComposer_input_error: this.state.showVisualBell,
         });
-        const classes = classNames("mx_BasicMessageComposer_input", {
-            mx_BasicMessageComposer_input_shouldShowPillAvatar: this.state.showPillAvatar,
-            mx_BasicMessageComposer_input_disabled: this.props.disabled,
-        });
+
+        const joinRule = this.props.room.getJoinRule();
+        var classes = classNames("mx_BasicMessageComposer_input");
+        if (joinRule == "public") {
+            classes = classNames("mx_BasicMessageComposer_input", {
+                mx_BasicMessageComposer_input_shouldShowPillAvatar: this.state.showPillAvatar,
+                mx_BasicMessageComposer_input_disabled: this.props.disabled,
+                mx_BasicMessageComposer_input_isPublic: true
+            });
+        } else {
+            classes = classNames("mx_BasicMessageComposer_input", {
+                mx_BasicMessageComposer_input_shouldShowPillAvatar: this.state.showPillAvatar,
+                mx_BasicMessageComposer_input_disabled: this.props.disabled,
+            });
+        }
 
         const shortcuts = {
             [Formatting.Bold]: ctrlShortcutLabel("B"),
